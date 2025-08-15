@@ -3,7 +3,7 @@ name: Docker Image CI
 env:
   CONTAINER_REGISTRY: "ghcr.io"
   VERSION_TAG: "test"
-  IMAGE_TAG: "$CONTAINER_REGISTRY/${{github.repository}}:VERSION_TAG"
+  IMAGE_TAG: "$CONTAINER_REGISTRY/${{github.repository}}:$VERSION_TAG"
 
 on:
   push:
@@ -17,7 +17,7 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
-      - run: docker build . --no-cache --file Dockerfile --tag $IMAGE_TAG 
+      - run: docker build . --no-cache --file Dockerfile --tag ${{env.IMAGE_TAG}} 
 
   publish:
     name: Publish the Docker image to ghcr.io
@@ -30,4 +30,4 @@ jobs:
           registry: ghcr.io
           username: ${{github.repository_owner}}
           password: ${{secrets.GH_TOKEN}}
-      - run: docker push $IMAGE_TAG
+      - run: docker push ${{env.IMAGE_TAG}}
