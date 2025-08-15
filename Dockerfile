@@ -1,4 +1,7 @@
+
 FROM mcr.microsoft.com/devcontainers/base:dev-debian-12
+
+LABEL org.opencontainers.image.source https://github.com/vwfinley/texlive
 
 ENV PATH="$PATH:/usr/local/texlive/2025/bin/x86_64-linux"
 
