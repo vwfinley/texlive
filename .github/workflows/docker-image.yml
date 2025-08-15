@@ -7,30 +7,16 @@ on:
     branches: [ "main" ]
 
 jobs:
-
-  login:
-    name: Login to GitHub Container Registry
-    runs-on: self-hosted
-    steps:
-      - uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GH_TOKEN }}
-
   build:
     name: Build the Docker image
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
-      - run: docker build .     --file Dockerfile --tag ghcr.io/${{ github.repository }}:test 
-#        run: docker build . --no-cache --file Dockerfile --tag texlive:$(date +%s)
-#        run: echo Hello, world!
+      - run: docker build . --no-cache --file Dockerfile --tag ghcr.io/${{ github.repository }}:test 
 
   publish:
     name: Publish the Docker image to ghcr.io
     needs:
-      - login
       - build
     runs-on: self-hosted
     steps:
@@ -40,5 +26,3 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GH_TOKEN }}
       - run: docker push ghcr.io/${{ github.repository }}:test
-#        run: echo Hello, world!
-#     - run: docker build . --no-cache --file Dockerfile --tag texlive:$(date +%s)
