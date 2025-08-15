@@ -23,7 +23,7 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
-      - run: docker build . --no-cache --file Dockerfile --tag ${{ github.repository }}:0.0.1 
+      - run: docker build .     --file Dockerfile --tag ghcr.io/${{ github.repository }}:test 
 #        run: docker build . --no-cache --file Dockerfile --tag texlive:$(date +%s)
 #        run: echo Hello, world!
 
@@ -34,6 +34,6 @@ jobs:
       - build
     runs-on: self-hosted
     steps:
-      - run: docker push ghcr.io/${{ github.repository }}:0.0.1
+      - run: docker push ghcr.io/${{ github.repository }}:test
 #        run: echo Hello, world!
 #     - run: docker build . --no-cache --file Dockerfile --tag texlive:$(date +%s)
