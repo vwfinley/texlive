@@ -3,7 +3,7 @@ name: Docker Image CI
 env:
   CONTAINER_REGISTRY: "ghcr.io"
   VERSION_TAG: "test"
-  IMAGE_TAG: $CONTAINER_REGISTRY/${{github.repository}}:VERSION_TAG 
+  IMAGE_TAG: "$CONTAINER_REGISTRY/${{github.repository}}:VERSION_TAG"
 
 on:
   push:
