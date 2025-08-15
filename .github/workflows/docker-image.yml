@@ -1,7 +1,6 @@
 name: Docker Image CI
 
 env:
-  RUNS_ON: "self-hosted"
   CONTAINER_REGISTRY: "ghcr.io"
   VERSION_TAG: "test"
   IMAGE_TAG: "$CONTAINER_REGISTRY/${{github.repository}}:$VERSION_TAG"
@@ -15,7 +14,7 @@ on:
 jobs:
   build:
     name: Build Docker image
-    runs-on: ${{vars.RUNS_ON}}
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
       - run: docker build . --no-cache --file Dockerfile --tag ${{env.IMAGE_TAG}} 
@@ -24,7 +23,7 @@ jobs:
     name: Publish Docker image to container registry
     needs:
       - build
-    runs-on: ${{vars.RUNS_ON}}
+    runs-on: self-hosted
     steps:
       - uses: docker/login-action@v3
         with:
