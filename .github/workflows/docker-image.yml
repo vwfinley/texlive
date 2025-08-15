@@ -15,7 +15,7 @@ on:
 jobs:
   build:
     name: Build Docker image
-    runs-on: ${{env.RUNS_ON}}
+    runs-on: ${{vars.RUNS_ON}}
     steps:
       - uses: actions/checkout@v4
       - run: docker build . --no-cache --file Dockerfile --tag ${{env.IMAGE_TAG}} 
@@ -24,7 +24,7 @@ jobs:
     name: Publish Docker image to container registry
     needs:
       - build
-    runs-on: ${{env.RUNS_ON}}
+    runs-on: ${{vars.RUNS_ON}}
     steps:
       - uses: docker/login-action@v3
         with:
