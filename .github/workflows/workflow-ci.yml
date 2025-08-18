@@ -23,6 +23,7 @@ jobs:
   set-image-tag:
     name: Set Image Tag
     runs-on: self-hosted
+    if: ${{ always() }}
     needs: set-version-tag
     outputs:
       steps: ${{ steps.image-tag.outputs }}
