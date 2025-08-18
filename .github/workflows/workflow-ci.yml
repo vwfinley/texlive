@@ -3,31 +3,60 @@ name: Docker Image CI
 env:
   CONTAINER_REGISTRY: "ghcr.io"
   VERSION_TAG: "test"
-  IMAGE_TAG: "$CONTAINER_REGISTRY/${{github.repository}}:$VERSION_TAG"
 
 on:
+  release:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches: "main"
 
 jobs:
+  set-version-tag:
+    name: Set Version Tag
+    runs-on: self-hosted
+    if: github.event_name == 'release'
+    outputs:
+      steps: ${{ steps.version-tag.outputs}}
+    steps:
+      - id: version-tag
+        run: echo "VERSION_TAG=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
+      
+  set-image-tag:
+    name: Set Image Tag
+    runs-on: self-hosted
+    needs: set-version-tag
+    outputs:
+      steps: ${{ steps.image-tag.outputs }}
+    steps:
+      - id: image-tag
+        run: echo "IMAGE_TAG=$CONTAINER_REGISTRY/${{ github.repository }}:$VERSION_TAG" >> $GITHUB_ENV
+
+#  set-timestamp:
+#    runs-on: ubuntu-latest
+#    outputs:
+#      steps: ${{ steps.timestamp.outputs }}
+#    steps:
+#      - name: Set Timestamp
+#        id: timestamp
+#        run: echo "TIMESTAMP=$(date +"%Y%m%d%H%M%S")" >> $GITHUB_ENV
+
+
   build:
     name: Build Docker image
     runs-on: self-hosted
+    needs: set-image-tag
     steps:
       - uses: actions/checkout@v4
-      - run: docker build . --no-cache --file Dockerfile --tag ${{env.IMAGE_TAG}} 
+      - run: docker build . --no-cache --file Dockerfile --tag $IMAGE_TAG
 
   publish:
     name: Publish Docker image to container registry
-    needs:
-      - build
+    needs: build
     runs-on: self-hosted
+    if: github.event_name == 'release'
     steps:
       - uses: docker/login-action@v3
         with:
           registry: ${{env.CONTAINER_REGISTRY}}
           username: ${{github.repository_owner}}
           password: ${{secrets.GH_TOKEN}}
-      - run: docker push ${{env.IMAGE_TAG}}
+      - run: docker push $IMAGE_TAG
