@@ -29,7 +29,7 @@ jobs:
       steps: ${{ steps.image-tag.outputs }}
     steps:
       - id: image-tag
-        run: echo "IMAGE_TAG=${CONTAINER_REGISTRY}/${{ github.repository }}:$VERSION_TAG" >> $GITHUB_ENV
+        run: echo "IMAGE_TAG=${{ env.CONTAINER_REGISTRY }}/${{ github.repository }}:${{ env.VERSION_TAG }}" >> $GITHUB_ENV
 
 #  set-timestamp:
 #    runs-on: ubuntu-latest
