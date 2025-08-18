@@ -10,6 +10,25 @@ on:
     branches: "main"
 
 jobs:
+
+
+  first-job:
+    runs-on: self-hosted
+    steps:
+    - id: identify
+      run: |
+        # use bash variable expression to get the substring
+        export GIT_PR_SHA="${{ github.sha }}"
+        export GIT_PR_SHA_SHORT="${GIT_PR_SHA:0:10}"
+
+        echo "git_pr_sha=${GIT_PR_SHA}" >> $GITHUB_OUTPUT
+        echo "git_pr_sha_short=${GIT_PR_SHA_SHORT}" >> $GITHUB_OUTPUT
+    outputs:
+      git_pr_sha: ${{ steps.identify.outputs.git_pr_sha }}
+      git_pr_sha_short: ${{ steps.identify.outputs.git_pr_sha_short }}
+
+
+
   set-version-tag:
     name: Set Version Tag
     runs-on: self-hosted
