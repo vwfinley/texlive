@@ -7,6 +7,8 @@ https://docs.docker.com/build/ci/github-actions/
 
 https://www.geeksforgeeks.org/git/github-actions/
 
+https://github.com/orgs/community/discussions/25692
+
 https://github.com/marketplace/actions/docker-login
 
 https://www.geeksforgeeks.org/git/introduction-to-github-actions/
@@ -25,6 +27,8 @@ https://stackoverflow.com/questions/63148639/create-dependencies-between-jobs-in
 https://www.howtogeek.com/devops/how-to-get-started-with-githubs-new-docker-container-registry/
 
 https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-variables
+
+https://stackoverflow.com/questions/75733616/github-actions-how-to-call-a-reusable-workflow-as-a-step
 
 https://medium.com/@deepak1812002/get-started-with-github-ghcr-an-alternative-of-dockerhub-f7d5b2198b9a
 
