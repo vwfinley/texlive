@@ -13,23 +13,6 @@ jobs:
 # https://stackoverflow.com/questions/59175332/using-output-from-a-previous-job-in-a-new-one-in-a-github-action
 # https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idoutputs
 
-  job1:
-    runs-on: self-hosted
-    # Expose step outputs as job outputs
-    outputs:
-      output1: ${{ steps.step1.outputs.first }}
-      output2: ${{ steps.step2.outputs.second }}
-    steps:
-    - id: step1
-      run: echo "first=hello" >> "$GITHUB_OUTPUT"
-    - id: step2
-      run: echo "second=world" >> "$GITHUB_OUTPUT"
-  job2:
-    runs-on: self-hosted
-    needs: job1
-    steps:
-    - run: echo ${{needs.job1.outputs.output1}} ${{needs.job1.outputs.output2}}
-
 
 #  set-image-tag:
 #    runs-on: self-hosted
@@ -70,29 +53,39 @@ jobs:
       - id: return
         run: echo "timestamp=$(date +"%Y%m%d%H%M%S")" >> $GITHUB_OUTPUT
 
-  jobA:
+  get-version:
     runs-on: self-hosted
     needs: get-timestamp
     outputs:
       version: ${{ steps.return.outputs.version }}
     steps:
-    - run: echo "VERSION=${{ needs.get-timestamp.outputs.timestamp }}" >> $GITHUB_ENV
     - if: github.event_name == 'release'
       run: echo "VERSION=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
+    - if: github.event_name != 'release'
+      run: echo "VERSION=${{ needs.get-timestamp.outputs.timestamp }}" >> $GITHUB_ENV
     - id: return
       run: echo "version=${{ env.VERSION }}" >> "$GITHUB_OUTPUT"
 
+  get-image-tag:
+    runs-on: self-hosted
+    needs: get-version
+    outputs:
+      image-tag: ${{ steps.return.outputs.image-tag }}
+    steps:
+      - id: return
+        run: echo "image-tag=${{ env.CONTAINER_REGISTRY }}/${{ github.repository }}:${{ steps.return.outputs.version }}" >> $GITHUB_OUTPUT
+
   jobB:
     runs-on: self-hosted
-    needs: jobA
+    needs: get-image-tag
     steps:
-    - run: echo ${{ needs.jobA.outputs.version }} 
+    - run: echo ${{ needs.get-image-tag.outputs.image-tag }} 
 
   jobC:
     runs-on: self-hosted
-    needs: jobA
+    needs: get-image-tag
     steps:
-    - run: echo ${{ needs.jobA.outputs.version }} 
+    - run: echo ${{ needs.get-image-tag.outputs.image-tag }} 
 
 #  set-version-tag:
 #    name: Set Version Tag
