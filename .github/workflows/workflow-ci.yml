@@ -6,8 +6,9 @@ env:
 
 on:
   release:
+    types: [published]
   push:
-    branches: "main"
+    branches: [main]
 
 jobs:
 # https://stackoverflow.com/questions/59175332/using-output-from-a-previous-job-in-a-new-one-in-a-github-action
