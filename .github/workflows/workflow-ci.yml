@@ -68,7 +68,7 @@ jobs:
 
   publish:
     name: Publish Docker image to container registry
-    needs: [get-version-tag, build]
+    needs: [get-version-tag, get-latest-tag, build]
     runs-on: self-hosted
     if: github.event_name == 'release'
     steps:
@@ -77,4 +77,4 @@ jobs:
           registry: ${{env.CONTAINER_REGISTRY}}
           username: ${{github.repository_owner}}
           password: ${{secrets.GITHUB_TOKEN}}
-      - run: docker push --all-tags ${{ needs.get-version-tag.outputs.version-tag }}
+      - run: docker push --tag ${{ needs.get-version-tag.outputs.version-tag }} --tag ${{  needs.get-latest-tag.outputs.latest-tag }}
