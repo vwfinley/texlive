@@ -2,7 +2,6 @@ name: Docker Image CI
 
 env:
   CONTAINER_REGISTRY: "ghcr.io"
-  VERSION_TAG: "test"
 
 on:
   release:
