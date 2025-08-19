@@ -77,4 +77,5 @@ jobs:
           registry: ${{env.CONTAINER_REGISTRY}}
           username: ${{github.repository_owner}}
           password: ${{secrets.GITHUB_TOKEN}}
-      - run: docker push --tag ${{ needs.get-version-tag.outputs.version-tag }} --tag ${{  needs.get-latest-tag.outputs.latest-tag }}
+      - run: docker push ${{ needs.get-version-tag.outputs.version-tag }}
+      - run: docker push ${{ needs.get-latest-tag.outputs.latest-tag }}
