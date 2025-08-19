@@ -62,22 +62,33 @@ jobs:
 #    steps:
 #    - run: echo ${{needs.set-image-tag.outputs.output1}}
 
-
+  get-timestamp:
+    runs-on: self-hosted
+    outputs:
+      timestamp: ${{ steps.return.outputs.timestamp }}
+    steps:
+      - id: return
+        run: echo "timestamp=$(date +"%Y%m%d%H%M%S")" >> $GITHUB_OUTPUT
 
   jobA:
     runs-on: self-hosted
+    needs: get-timestamp
     outputs:
-      version: ${{ steps.step3.outputs.version }}
+      version: ${{ steps.return.outputs.version }}
     steps:
-    - id: step1
-      run: echo "VERSION=hello" >> $GITHUB_ENV
-    - id: step2
-      if: github.event_name == 'release'
-      run: echo "VERSION=world" >> $GITHUB_ENV
-    - id: step3
+    - run: echo "VERSION=${{ needs.get-timestamp.outputs.timestamp }}" >> $GITHUB_ENV
+    - if: github.event_name == 'release'
+      run: echo "VERSION=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
+    - id: return
       run: echo "version=${{ env.VERSION }}" >> "$GITHUB_OUTPUT"
 
   jobB:
+    runs-on: self-hosted
+    needs: jobA
+    steps:
+    - run: echo ${{ needs.jobA.outputs.version }} 
+
+  jobC:
     runs-on: self-hosted
     needs: jobA
     steps:
