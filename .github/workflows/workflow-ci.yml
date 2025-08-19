@@ -14,38 +14,6 @@ jobs:
 # https://stackoverflow.com/questions/59175332/using-output-from-a-previous-job-in-a-new-one-in-a-github-action
 # https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idoutputs
 
-
-#  set-image-tag:
-#    runs-on: self-hosted
-#    # Expose step outputs as job outputs
-#    outputs:
-#      output1: ${{ steps.step1.outputs.first }}
-#    steps:
-#    - id: step1
-#      run: |
-#        version=test
-#        if [ github.event_name = 'release' ] then;
-#          version=${{ github.event.release.tag_name }}
-#        fi
-#        echo "first=${{ env.CONTAINER_REGISTRY }}/${{ github.repository }}:$version" >> $GITHUB_OUTPUT
-
-
-
-#  set-image-tag:
-#    runs-on: self-hosted
-#    # Expose step outputs as job outputs
-#    outputs:
-#      output1: ${{ steps.step1.outputs.first }}
-#    steps:
-#    - id: step1
-#      run: echo "first=test" >> $GITHUB_OUTPUT
-#
-#  use-image-tag:
-#    runs-on: self-hosted
-#    needs: set-image-tag
-#    steps:
-#    - run: echo ${{needs.set-image-tag.outputs.output1}}
-
   get-timestamp:
     runs-on: self-hosted
     outputs:
@@ -76,67 +44,23 @@ jobs:
       - id: return
         run: echo "image-tag=${{ env.CONTAINER_REGISTRY }}/${{ github.repository }}:${{ needs.get-version.outputs.version }}" >> $GITHUB_OUTPUT
 
-  jobB:
+  build:
+    name: Build Docker image
     runs-on: self-hosted
     needs: get-image-tag
     steps:
-    - run: echo ${{ needs.get-image-tag.outputs.image-tag }} 
+      - uses: actions/checkout@v4
+      - run: docker build . --no-cache --file Dockerfile --tag ${{ needs.get-image-tag.outputs.image-tag }}
 
-  jobC:
+  publish:
+    name: Publish Docker image to container registry
+    needs: [get-image-tag, build]
     runs-on: self-hosted
-    needs: get-image-tag
+    if: github.event_name == 'release'
     steps:
-    - run: echo ${{ needs.get-image-tag.outputs.image-tag }} 
-
-#  set-version-tag:
-#    name: Set Version Tag
-#    runs-on: self-hosted
-#    if: github.event_name == 'release'
-#    outputs:
-#      steps: ${{ steps.version-tag.outputs}}
-#    steps:
-#      - id: version-tag
-#        run: echo "VERSION_TAG=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
-#      
-#  set-image-tag:
-#    name: Set Image Tag
-#    runs-on: self-hosted
-#    if: ${{ always() }}
-#    needs: set-version-tag
-#    outputs:
-#      steps: ${{ steps.image-tag.outputs }}
-#    steps:
-#      - id: image-tag
-#        run: echo "IMAGE_TAG=${{ env.CONTAINER_REGISTRY }}/${{ github.repository }}:${{ env.VERSION_TAG }}" >> $GITHUB_ENV
-
-#  set-timestamp:
-#    runs-on: ubuntu-latest
-#    outputs:
-#      steps: ${{ steps.timestamp.outputs }}
-#    steps:
-#      - name: Set Timestamp
-#        id: timestamp
-#        run: echo "TIMESTAMP=$(date +"%Y%m%d%H%M%S")" >> $GITHUB_ENV
-
-
-#  build:
-#    name: Build Docker image
-#    runs-on: self-hosted
-#    needs: set-image-tag
-#    steps:
-#      - uses: actions/checkout@v4
-#      - run: docker build . --no-cache --file Dockerfile --tag $IMAGE_TAG
-#
-#  publish:
-#    name: Publish Docker image to container registry
-#    needs: build
-#    runs-on: self-hosted
-#    if: github.event_name == 'release'
-#    steps:
-#      - uses: docker/login-action@v3
-#        with:
-#          registry: ${{env.CONTAINER_REGISTRY}}
-#          username: ${{github.repository_owner}}
-#          password: ${{secrets.GH_TOKEN}}
-#      - run: docker push $IMAGE_TAG
-#
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{env.CONTAINER_REGISTRY}}
+          username: ${{github.repository_owner}}
+          password: ${{secrets.GH_TOKEN}}
+      - run: docker push ${{ needs.get-image-tag.outputs.image-tag }}
