@@ -40,7 +40,7 @@ jobs:
     - id: step1
       run: |
         version=test
-        if: github.event_name == 'release'
+        if github.event_name == 'release'
           version=${{ github.event.release.tag_name }}
         echo "first=${{ env.CONTAINER_REGISTRY }}/${{ github.repository }}:$version" >> $GITHUB_OUTPUT
 
