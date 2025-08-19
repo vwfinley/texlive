@@ -40,10 +40,9 @@ jobs:
     - id: step1
       run: |
         version=test
-        if [github.event_name = 'release'] then;
+        if [ github.event_name = 'release' ] then;
           version=${{ github.event.release.tag_name }}
         fi
-
         echo "first=${{ env.CONTAINER_REGISTRY }}/${{ github.repository }}:$version" >> $GITHUB_OUTPUT
 
   use-image-tag:
