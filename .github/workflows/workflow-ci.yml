@@ -11,9 +11,6 @@ on:
     branches: [main]
 
 jobs:
-# https://stackoverflow.com/questions/59175332/using-output-from-a-previous-job-in-a-new-one-in-a-github-action
-# https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idoutputs
-
   get-timestamp:
     runs-on: self-hosted
     outputs:
@@ -35,26 +32,43 @@ jobs:
     - id: return
       run: echo "version=${{ env.VERSION }}" >> "$GITHUB_OUTPUT"
 
-  get-image-tag:
+  get-base-tag:
     runs-on: self-hosted
-    needs: get-version
     outputs:
-      image-tag: ${{ steps.return.outputs.image-tag }}
+      base-tag: ${{ steps.return.outputs.base-tag }}
     steps:
       - id: return
-        run: echo "image-tag=${{ env.CONTAINER_REGISTRY }}/${{ github.repository }}:${{ needs.get-version.outputs.version }}" >> $GITHUB_OUTPUT
+        run: echo "base-tag=${{ env.CONTAINER_REGISTRY }}/${{ github.repository }}" >> $GITHUB_OUTPUT
+
+  get-version-tag:
+    runs-on: self-hosted
+    needs: [get-version, get-base-tag]
+    outputs:
+      version-tag: ${{ steps.return.outputs.version-tag }}
+    steps:
+      - id: return
+        run: echo "version-tag=${{ needs.get-base-tag.outputs.base-tag }}:${{ needs.get-version.outputs.version }}" >> $GITHUB_OUTPUT
+
+  get-latest-tag:
+    runs-on: self-hosted
+    needs: [get-base-tag]
+    outputs:
+      latest-tag: ${{ steps.return.outputs.latest-tag }}
+    steps:
+      - id: return
+        run: echo "latest-tag=${{ needs.get-base-tag.outputs.base-tag }}:latest" >> $GITHUB_OUTPUT
 
   build:
     name: Build Docker image
     runs-on: self-hosted
-    needs: get-image-tag
+    needs: [get-version-tag, get-latest-tag]
     steps:
       - uses: actions/checkout@v4
-      - run: docker build . --no-cache --file Dockerfile --tag ${{ needs.get-image-tag.outputs.image-tag }}
+      - run: docker build . --no-cache --file Dockerfile --tag ${{ needs.get-version-tag.outputs.version-tag }} --tag ${{  needs.get-latest-tag.outputs.latest-tag }}
 
   publish:
     name: Publish Docker image to container registry
-    needs: [get-image-tag, build]
+    needs: [get-version-tag, build]
     runs-on: self-hosted
     if: github.event_name == 'release'
     steps:
@@ -62,5 +76,5 @@ jobs:
         with:
           registry: ${{env.CONTAINER_REGISTRY}}
           username: ${{github.repository_owner}}
-          password: ${{secrets.GH_TOKEN}}
-      - run: docker push ${{ needs.get-image-tag.outputs.image-tag }}
+          password: ${{secrets.GITHUB_TOKEN}}
+      - run: docker push --all-tags ${{ needs.get-version-tag.outputs.version-tag }}

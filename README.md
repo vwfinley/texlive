@@ -1,39 +1,57 @@
-# texlive
-TexLive Container Image
+# Repository for vwfinley/texlive
+Contains code to build a Docker developer container containing the TexLive distribution
+of the LaTeX typesetting system.
 
-https://docs.github.com/en/actions
+The container is a developer container appropriate for use with VSCode,
+however, it is not necessary to open the container in VSCode or remote into it.
 
-https://docs.docker.com/build/ci/github-actions/
+## Get the container
+Before using the container you'll first need to pull the container.
 
-https://www.geeksforgeeks.org/git/github-actions/
+To pull the latest container version from the GitHub package repository
+into your local docker repo, simply do the following at the commandline.
+```
+docker pull ghcr.io/vwfinley/texlive:latest
 
-https://github.com/orgs/community/discussions/25692
+docker images
+```
 
-https://github.com/marketplace/actions/docker-login
+## Run the container 
+In typical usage the container can be run externally from the Docker host
+by calling the Docker run command from the current directory.
 
-https://www.geeksforgeeks.org/git/introduction-to-github-actions/
+For example:
+```
+docker run --rm -it \
+    -v $(pwd):/workspace \
+    ghcr.io/vwfinley/texlive:latest \
+    latex -output-format=pdf -output-directory=output input.tex
+```
 
-https://github.com/marketplace/actions/build-and-push-docker-images
+Be sure to use the `-v $(pwd):/workspace` option above, as this will map your files in 
+the current directory to the /workspace directory inside the developer container.
 
-https://www.geeksforgeeks.org/devops/build-docker-image-in-github-actions/
+The latex process is the actual process that converts your main input.tex LaTeX source file into the finished pdf file.
+The `latex` reference above tells Docker to run the latex process on your input.tex file inside the container.
 
-https://github.com/marketplace/actions/docker-build-and-push-multi-platform-and-registry
+The completed pdf file will be written to the directory given by `-output-directory=output`
 
-https://docs.github.com/en/actions/how-tos/manage-runners/self-hosted-runners/add-runners
+## Extend the container (Errors and Missing packages)
+The container does not have the full TexLive system installed, as that would be quite large.
+So instead the container was built with the TexLive scheme=small option.
 
-https://www.geeksforgeeks.org/devops/how-to-create-a-basic-ci-workflow-using-github-actions/
+While the scheme=small option has most of what is needed for generating most documents, it will inevitably be missing some tlmgr packages.
+Occasionally an error saying some .sty package file cannot be found.
+```
+! LaTeX Error: File `gensymb.sty' not found.
+```
+No worries, you can always add any missing packages.
 
-https://stackoverflow.com/questions/63148639/create-dependencies-between-jobs-in-github-actions
-https://www.howtogeek.com/devops/how-to-get-started-with-githubs-new-docker-container-registry/
+The best way to add the packages is to create a Dockerfile.
+Inside the Dockerfile run tlmgr to add the additional packages.
+For example:
+```
+tlmgr install gensymb 
+```
 
-https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-variables
-
-https://stackoverflow.com/questions/75733616/github-actions-how-to-call-a-reusable-workflow-as-a-step
-
-https://medium.com/@deepak1812002/get-started-with-github-ghcr-an-alternative-of-dockerhub-f7d5b2198b9a
-
-https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry
-
-https://docs.github.com/en/actions/tutorials/authenticate-with-github_token#using-the-github_token-in-a-workflow
-
-https://www.bing.com/videos/riverview/relatedvideo?q=browse+ghcr.io&mid=638351869D0BB7F5FC14638351869D0BB7F5FC14&FORM=VIRE
+A better example is to see the Dockerfile at `https://github.com/vwfinley/texlive_dev`
