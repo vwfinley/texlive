@@ -34,7 +34,7 @@ the current directory to the /workspace directory inside the developer container
 The latex process is the actual process that converts your main input.tex LaTeX source file into the finished pdf file.
 The `latex` reference above tells Docker to run the latex process on your input.tex file inside the container.
 
-The completed pdf file will be written to the directory given by `-output-directory=output`
+The completed pdf file will be written to the subdirectory given by `-output-directory=output`
 
 ## Extend the container (Errors and Missing packages)
 The container does not have the full TexLive system installed, as that would be quite large.
