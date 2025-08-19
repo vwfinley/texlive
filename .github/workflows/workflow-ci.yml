@@ -14,7 +14,7 @@ jobs:
 # https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idoutputs
 
   job1:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     # Expose step outputs as job outputs
     outputs:
       output1: ${{ steps.step1.outputs.first }}
@@ -25,10 +25,32 @@ jobs:
     - id: step2
       run: echo "second=world" >> "$GITHUB_OUTPUT"
   job2:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: job1
     steps:
     - run: echo ${{needs.job1.outputs.output1}} ${{needs.job1.outputs.output2}}
+
+
+  set-image-tag:
+    runs-on: self-hosted
+    # Expose step outputs as job outputs
+    outputs:
+      output1: ${{ steps.step1.outputs.first }}
+    steps:
+    - id: step1
+      run: |
+        version=test
+        if: github.event_name == 'release'
+          version=${{ github.event.release.tag_name }}
+        echo "first=${{ env.CONTAINER_REGISTRY }}/${{ github.repository }}:$version" >> $GITHUB_OUTPUT
+
+  use-image-tag:
+    runs-on: self-hosted
+    needs: set-image-tag
+    steps:
+    - run: echo ${{needs.set-image-tag.outputs.output1}}
+
+
 
 #  set-version-tag:
 #    name: Set Version Tag
