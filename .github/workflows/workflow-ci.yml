@@ -73,7 +73,7 @@ jobs:
       image-tag: ${{ steps.return.outputs.image-tag }}
     steps:
       - id: return
-        run: echo "image-tag=${{ env.CONTAINER_REGISTRY }}/${{ github.repository }}:${{ steps.return.outputs.version }}" >> $GITHUB_OUTPUT
+        run: echo "image-tag=${{ env.CONTAINER_REGISTRY }}/${{ github.repository }}:${{ needs.get-version.outputs.version }}" >> $GITHUB_OUTPUT
 
   jobB:
     runs-on: self-hosted
