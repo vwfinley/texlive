@@ -31,27 +31,57 @@ jobs:
     - run: echo ${{needs.job1.outputs.output1}} ${{needs.job1.outputs.output2}}
 
 
-  set-image-tag:
+#  set-image-tag:
+#    runs-on: self-hosted
+#    # Expose step outputs as job outputs
+#    outputs:
+#      output1: ${{ steps.step1.outputs.first }}
+#    steps:
+#    - id: step1
+#      run: |
+#        version=test
+#        if [ github.event_name = 'release' ] then;
+#          version=${{ github.event.release.tag_name }}
+#        fi
+#        echo "first=${{ env.CONTAINER_REGISTRY }}/${{ github.repository }}:$version" >> $GITHUB_OUTPUT
+
+
+
+#  set-image-tag:
+#    runs-on: self-hosted
+#    # Expose step outputs as job outputs
+#    outputs:
+#      output1: ${{ steps.step1.outputs.first }}
+#    steps:
+#    - id: step1
+#      run: echo "first=test" >> $GITHUB_OUTPUT
+#
+#  use-image-tag:
+#    runs-on: self-hosted
+#    needs: set-image-tag
+#    steps:
+#    - run: echo ${{needs.set-image-tag.outputs.output1}}
+
+
+
+  jobA:
     runs-on: self-hosted
-    # Expose step outputs as job outputs
     outputs:
-      output1: ${{ steps.step1.outputs.first }}
+      version: ${{ steps.step3.outputs.version }}
     steps:
     - id: step1
-      run: |
-        version=test
-        if [ github.event_name = 'release' ] then;
-          version=${{ github.event.release.tag_name }}
-        fi
-        echo "first=${{ env.CONTAINER_REGISTRY }}/${{ github.repository }}:$version" >> $GITHUB_OUTPUT
+      run: echo "VERSION=hello" >> $GITHUB_ENV
+    - id: step2
+      if: github.event_name == 'release'
+      run: echo "VERSION=world" >> $GITHUB_ENV
+    - id: step3
+      run: echo "version=${{ env.VERSION }}" >> "$GITHUB_OUTPUT"
 
-  use-image-tag:
+  jobB:
     runs-on: self-hosted
-    needs: set-image-tag
+    needs: jobA
     steps:
-    - run: echo ${{needs.set-image-tag.outputs.output1}}
-
-
+    - run: echo ${{ needs.jobA.outputs.version }} 
 
 #  set-version-tag:
 #    name: Set Version Tag
