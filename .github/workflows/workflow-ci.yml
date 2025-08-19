@@ -10,12 +10,14 @@ on:
     branches: "main"
 
 jobs:
+# https://stackoverflow.com/questions/59175332/using-output-from-a-previous-job-in-a-new-one-in-a-github-action
+
   job1:
     runs-on: ubuntu-latest
     # Expose step outputs as job outputs
     outputs:
-      output1: ${{ steps.step1.outputs.test }}
-      output2: ${{ steps.step2.outputs.test }}
+      output1: ${{ steps.step1.outputs }}
+      output2: ${{ steps.step2.outputs }}
     steps:
     - id: step1
       run: echo "test=hello" >> "$GITHUB_OUTPUT"
