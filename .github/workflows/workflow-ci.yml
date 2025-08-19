@@ -11,18 +11,19 @@ on:
 
 jobs:
 # https://stackoverflow.com/questions/59175332/using-output-from-a-previous-job-in-a-new-one-in-a-github-action
+# https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idoutputs
 
   job1:
     runs-on: ubuntu-latest
     # Expose step outputs as job outputs
     outputs:
-      output1: ${{ steps.step1.outputs }}
-      output2: ${{ steps.step2.outputs }}
+      output1: ${{ steps.step1.outputs.first }}
+      output2: ${{ steps.step2.outputs.second }}
     steps:
     - id: step1
-      run: echo "test=hello" >> "$GITHUB_OUTPUT"
+      run: echo "first=hello" >> "$GITHUB_OUTPUT"
     - id: step2
-      run: echo "test=world" >> "$GITHUB_OUTPUT"
+      run: echo "second=world" >> "$GITHUB_OUTPUT"
   job2:
     runs-on: ubuntu-latest
     needs: job1
