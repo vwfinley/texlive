@@ -16,7 +16,7 @@ RUN <<EOF
     wget https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
     zcat < install-tl-unx.tar.gz | tar xf -
     cd install-tl-*
-    perl ./install-tl --scheme=${TEXLIVE_SCHEME}} --no-interaction --no-doc-install --no-src-install
+    perl ./install-tl --scheme=${TEXLIVE_SCHEME} --no-interaction --no-doc-install --no-src-install
     tlmgr update --all
     cd ..
     rm -r install*
