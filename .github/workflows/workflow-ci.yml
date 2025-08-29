@@ -63,7 +63,7 @@ jobs:
     needs: [get-version-tag, get-latest-tag]
     steps:
       - uses: actions/checkout@v4
-      - run: docker build . --no-cache --file Dockerfile --tag ${{ needs.get-version-tag.outputs.version-tag }} --tag ${{  needs.get-latest-tag.outputs.latest-tag }}
+      - run: docker build . --no-cache --network=host --file Dockerfile --tag ${{ needs.get-version-tag.outputs.version-tag }} --tag ${{  needs.get-latest-tag.outputs.latest-tag }}
 
   publish:
     name: Publish Docker image to container registry
